@@ -17,6 +17,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var textView: UITextView!
     
+    var myAnnotations = [CLLocation]()
+    
     let locationManager = CLLocationManager()
 
     
@@ -28,7 +30,22 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         mapView.showsUserLocation = true
-        mapView.delegate = self    }
+        mapView.delegate = self
+        
+        let longGesture = UILongPressGestureRecognizer(target: self,
+       action: #selector(addPin(longGesture:)))
+        mapView.addGestureRecognizer(longGesture)
+    }
+    @objc func addPin(longGesture: UIGestureRecognizer) {
+        let touchPoint = longGesture.location(in: mapView)
+        let touchLocation = mapView.convert(touchPoint, toCoordinateFrom: mapView)
+        let location = CLLocation(latitude: touchLocation.latitude, longitude: touchLocation.longitude)
+        let myAnnotation = MKPointAnnotation()
+        myAnnotation.coordinate = touchLocation
+        myAnnotation.title = "\(touchLocation.latitude) \(touchLocation.longitude)"
+        myAnnotations.append(location)
+        self.mapView.addAnnotation(myAnnotation);
+        }
     
 
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
@@ -45,6 +62,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDele
         
     }
 
-
+    @IBAction func clearPins(_ sender: Any) {
+        mapView.removeAnnotations(mapView.annotations)
+        myAnnotations.removeAll()
+        
+    }
+    
 }
 
